@@ -69,9 +69,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
-    packaging {
-        resources.excludes.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
-    }
 }
 
 
@@ -84,7 +81,7 @@ mavenPublishing {
 
     pom {
         name = "loki"
-        description = "Shared Memory Library"
+        description = "Memory Library"
         inceptionYear = "2025"
         url = "https://github.com/remmerw/grid/"
         licenses {
