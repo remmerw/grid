@@ -2,14 +2,12 @@ package io.github.remmerw.grid
 
 import kotlinx.io.Buffer
 import kotlinx.io.RawSink
-import kotlinx.io.buffered
-import kotlinx.io.write
 import java.nio.ByteBuffer
 import kotlin.uuid.ExperimentalUuidApi
 
-class AndroidMemory(val memory: ByteBuffer,) : Memory {
-    override fun length(): Int {
-        return memory.capacity()
+class AndroidMemory(val memory: ByteBuffer, val size: Int) : Memory {
+    override fun size(): Int {
+        return size
     }
 
     override fun readBytes(offset: Int, length: Int): ByteArray {
@@ -31,7 +29,7 @@ class AndroidMemory(val memory: ByteBuffer,) : Memory {
         val bytes = ByteArray(UShort.MAX_VALUE.toInt())
         do {
             val remains = memory.remaining()
-            if(remains >= bytes.size){
+            if (remains >= bytes.size) {
                 memory.get(bytes)
                 val buffer = Buffer()
                 buffer.write(bytes)
@@ -44,7 +42,7 @@ class AndroidMemory(val memory: ByteBuffer,) : Memory {
                 sink.write(buffer, data.size.toLong())
             }
 
-        } while(remains > 0)
+        } while (remains > 0)
     }
 
 }
@@ -54,6 +52,6 @@ actual fun allocateMemory(size: Int): Memory {
 
     val memory = ByteBuffer.allocateDirect(size)
 
-    return AndroidMemory(memory)
+    return AndroidMemory(memory, size)
 
 }

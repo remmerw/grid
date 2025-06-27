@@ -5,9 +5,9 @@ import kotlinx.io.RawSink
 import java.nio.ByteBuffer
 import kotlin.uuid.ExperimentalUuidApi
 
-class JvmMemory(val memory: ByteBuffer) : Memory {
-    override fun length(): Int {
-        return memory.capacity()
+class JvmMemory(val memory: ByteBuffer, val size: Int) : Memory {
+    override fun size(): Int {
+        return size
     }
 
     override fun readBytes(offset: Int, length: Int): ByteArray {
@@ -29,7 +29,7 @@ class JvmMemory(val memory: ByteBuffer) : Memory {
         val bytes = ByteArray(UShort.MAX_VALUE.toInt())
         do {
             val remains = memory.remaining()
-            if(remains >= bytes.size){
+            if (remains >= bytes.size) {
                 memory.get(bytes)
                 val buffer = Buffer()
                 buffer.write(bytes)
@@ -42,7 +42,7 @@ class JvmMemory(val memory: ByteBuffer) : Memory {
                 sink.write(buffer, data.size.toLong())
             }
 
-        } while(remains > 0)
+        } while (remains > 0)
     }
 
 }
@@ -52,6 +52,6 @@ actual fun allocateMemory(size: Int): Memory {
 
     val memory = ByteBuffer.allocateDirect(size)
 
-    return JvmMemory(memory)
+    return JvmMemory(memory, size)
 
 }

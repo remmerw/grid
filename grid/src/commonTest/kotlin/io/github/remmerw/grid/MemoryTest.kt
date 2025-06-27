@@ -9,7 +9,7 @@ import kotlin.test.assertTrue
 class MemoryTest {
 
     @Test
-    fun allocateSmall(){
+    fun allocateSmall() {
 
         val data = "Moin".encodeToByteArray()
         val memory = allocateMemory(data.size)
@@ -25,9 +25,9 @@ class MemoryTest {
 
 
     @Test
-    fun allocateBig(){
+    fun allocateBig() {
 
-        val data = Random.nextBytes( 2.times(UShort.MAX_VALUE.toInt()) + 10000)
+        val data = Random.nextBytes(2.times(UShort.MAX_VALUE.toInt()) + 10000)
         val memory = allocateMemory(data.size)
         memory.writeBytes(data, 0)
         val a = memory.readBytes(0, data.size)
