@@ -20,7 +20,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             ...
-            implementation("io.github.remmerw:grid:0.0.1")
+            implementation("io.github.remmerw:grid:0.0.2")
         }
         ...
     }
@@ -32,14 +32,26 @@ kotlin {
 
 ```
     
-interface Memory {
+interface Memory : ReadOnlyMemory {
+    fun writeBytes(bytes: ByteArray, offset: Int)
+
+}
+interface ReadOnlyMemory {
     fun size(): Int
     fun readBytes(offset: Int, length: Int): ByteArray
-    fun writeBytes(bytes: ByteArray, offset: Int)
-    fun transferTo(sink: RawSink)
+    fun transferTo(sink: RawSink) {
+        rawSource().buffered().transferTo(sink)
+    }
+    fun rawSource(): RawSource
 }
 
 expect fun allocateMemory(size: Int): Memory
-    
+
+fun allocateReadOnlyMemory(bytes: ByteArray): ReadOnlyMemory {
+    val memory = allocateMemory(bytes.size)
+    memory.writeBytes(bytes, 0)
+    return memory
+}
+
 ```
 
