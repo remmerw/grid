@@ -1,6 +1,7 @@
 package io.github.remmerw.grid
 
 import kotlinx.io.Buffer
+import kotlinx.io.buffered
 import kotlinx.io.readByteArray
 import kotlin.random.Random
 import kotlin.test.Test
@@ -21,6 +22,8 @@ class MemoryTest {
         memory.transferTo(buffer)
         val b = buffer.readByteArray()
         assertTrue(data.contentEquals(b))
+        val c = memory.rawSource().buffered().readByteArray()
+        assertTrue(data.contentEquals(c))
     }
 
 
@@ -37,5 +40,7 @@ class MemoryTest {
         memory.transferTo(buffer)
         val b = buffer.readByteArray()
         assertTrue(data.contentEquals(b))
+        val c = memory.rawSource().buffered().readByteArray()
+        assertTrue(data.contentEquals(c))
     }
 }

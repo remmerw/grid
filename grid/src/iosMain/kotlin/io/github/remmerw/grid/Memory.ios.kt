@@ -9,12 +9,13 @@ import kotlinx.cinterop.convert
 import kotlinx.cinterop.readBytes
 import kotlinx.cinterop.usePinned
 import kotlinx.io.Buffer
-import kotlinx.io.RawSink
+import kotlinx.io.RawSource
 import platform.Foundation.NSMakeRange
 import platform.Foundation.NSMutableData
 import platform.Foundation.create
 import platform.Foundation.replaceBytesInRange
 import platform.Foundation.subdataWithRange
+import kotlin.math.min
 import kotlin.uuid.ExperimentalUuidApi
 
 class IosMemory(val memory: NSMutableData, val size: Int) : Memory {
@@ -39,26 +40,27 @@ class IosMemory(val memory: NSMutableData, val size: Int) : Memory {
         }
     }
 
-    override fun transferTo(sink: RawSink) {
-        val split = UShort.MAX_VALUE.toInt()
+    override fun rawSource(): RawSource {
         var offset = 0
-        var remains = size
-        do {
-            if (remains >= split) {
-                val bytes = readBytes(offset, split)
+        return object : RawSource {
+            override fun readAtMostTo(
+                sink: Buffer,
+                byteCount: Long
+            ): Long {
+                val read = min(byteCount, (size() - offset).toLong())
+                val bytes = readBytes(offset, read.toInt())
                 val buffer = Buffer()
                 buffer.write(bytes)
-                sink.write(buffer, split.toLong())
-                remains -= split
-                offset += split
-            } else {
-                val bytes = readBytes(offset, remains)
-                val buffer = Buffer()
-                buffer.write(bytes)
-                sink.write(buffer, remains.toLong())
+                sink.write(buffer, read)
+                offset += read.toInt()
+                return read
             }
 
-        } while (remains > 0)
+            override fun close() {
+                // nothing to do
+            }
+
+        }
     }
 
 }

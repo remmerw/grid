@@ -1,8 +1,10 @@
 package io.github.remmerw.grid
 
 import kotlinx.io.Buffer
-import kotlinx.io.RawSink
+import kotlinx.io.RawSource
+import kotlinx.io.bytestring.getByteString
 import java.nio.ByteBuffer
+import kotlin.math.min
 import kotlin.uuid.ExperimentalUuidApi
 
 class JvmMemory(val memory: ByteBuffer, val size: Int) : Memory {
@@ -24,25 +26,30 @@ class JvmMemory(val memory: ByteBuffer, val size: Int) : Memory {
         memory.put(bytes)
     }
 
-    override fun transferTo(sink: RawSink) {
+
+    override fun rawSource(): RawSource {
         memory.rewind()
-        val bytes = ByteArray(UShort.MAX_VALUE.toInt())
-        do {
-            val remains = memory.remaining()
-            if (remains >= bytes.size) {
-                memory.get(bytes)
-                val buffer = Buffer()
-                buffer.write(bytes)
-                sink.write(buffer, bytes.size.toLong())
-            } else {
-                val data = ByteArray(remains)
-                memory.get(data)
-                val buffer = Buffer()
-                buffer.write(data)
-                sink.write(buffer, data.size.toLong())
+
+        return object : RawSource {
+            override fun readAtMostTo(
+                sink: Buffer,
+                byteCount: Long
+            ): Long {
+                val read = min(byteCount, memory.remaining().toLong())
+                if (read > 0) {
+                    val data = memory.getByteString(read.toInt())
+                    sink.write(data.toByteArray())
+                    return read
+                } else {
+                    return -1
+                }
             }
 
-        } while (remains > 0)
+            override fun close() {
+                // nothing to do
+            }
+
+        }
     }
 
 }
