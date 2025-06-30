@@ -80,7 +80,7 @@ mavenPublishing {
     coordinates(group.toString(), "grid", version.toString())
 
     pom {
-        name = "loki"
+        name = "grid"
         description = "Memory Library"
         inceptionYear = "2025"
         url = "https://github.com/remmerw/grid/"
