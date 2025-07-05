@@ -143,7 +143,7 @@ class Tests {
         // second run
         val sink = Buffer()
         randomAccessFile(file).use { raf ->
-            raf.transferTo(sink, offset, data.size)
+            raf.transferTo(sink, offset, data.size.toLong())
             assertContentEquals(data, sink.readByteArray())
         }
     }
