@@ -9,7 +9,7 @@
 
 ## Grid
 
-The **Grid** is a small library which allocates memory outside the "heap".
+The **Grid** is a small library which contains small memory functionality.
 
 
 ## Integration
@@ -20,7 +20,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             ...
-            implementation("io.github.remmerw:grid:0.0.3")
+            implementation("io.github.remmerw:grid:0.0.4")
         }
         ...
     }
@@ -32,6 +32,8 @@ kotlin {
 
 ```
 
+
+
 interface Memory {
     fun writeBytes(bytes: ByteArray, offset: Int)
     fun size(): Int
@@ -42,10 +44,20 @@ interface Memory {
     fun rawSource(): RawSource
 }
 
-expect fun allocateMemory(size: Int): Memory
 
+interface RandomAccessFile : AutoCloseable {
+    fun readBytes(offset: Long, length: Int): ByteArray
+    fun writeBytes(bytes: ByteArray, offset: Long)
+    override fun close()
+}
+
+
+fun allocateMemory(size: Int): Memory {...}
 fun allocateMemory(bytes: ByteArray): Memory {...}
 fun allocateMemory(path: Path): Memory {...}
+
+
+fun randomAccessFile(path:Path): RandomAccessFile {...}
 
 ```
 

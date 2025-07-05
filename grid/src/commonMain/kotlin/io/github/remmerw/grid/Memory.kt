@@ -8,6 +8,15 @@ import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.readByteArray
 
+const val SPLITTER = 4096L
+
+interface RandomAccessFile : AutoCloseable {
+    fun readBytes(offset: Long, length: Int): ByteArray
+    fun writeBytes(bytes: ByteArray, offset: Long)
+    fun writeMemory(memory: Memory, offset: Long)
+    override fun close()
+}
+
 interface Memory {
     fun writeBytes(bytes: ByteArray, offset: Int)
     fun size(): Int
@@ -18,6 +27,7 @@ interface Memory {
     fun rawSource(): RawSource
 }
 expect fun allocateMemory(size: Int): Memory
+expect fun randomAccessFile(path:Path): RandomAccessFile
 
 fun allocateMemory(bytes: ByteArray): Memory {
     val memory = allocateMemory(bytes.size)

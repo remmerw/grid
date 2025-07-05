@@ -3,9 +3,44 @@ package io.github.remmerw.grid
 import kotlinx.io.Buffer
 import kotlinx.io.RawSource
 import kotlinx.io.bytestring.getByteString
+import kotlinx.io.files.Path
+import kotlinx.io.readByteArray
+import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import kotlin.math.min
 import kotlin.uuid.ExperimentalUuidApi
+
+class AndroidRandomAccessFile(val raf: RandomAccessFile) : io.github.remmerw.grid.RandomAccessFile {
+    override fun readBytes(offset: Long, length: Int): ByteArray {
+        raf.seek(offset)
+        val data = ByteArray(length)
+        raf.readFully(data)
+        return data
+    }
+
+    override fun writeBytes(bytes: ByteArray, offset: Long) {
+        raf.seek(offset)
+        raf.write(bytes)
+    }
+
+    override fun writeMemory(memory: Memory, offset: Long) {
+        raf.seek(offset)
+        val buffer = Buffer()
+        memory.rawSource().use { source ->
+            do {
+                val written = source.readAtMostTo(buffer, SPLITTER)
+                if(written > 0){
+                    raf.write(buffer.readByteArray())
+                }
+            } while(written > 0)
+        }
+    }
+
+    override fun close() {
+        raf.close()
+    }
+
+}
 
 class AndroidMemory(val memory: ByteBuffer, val size: Int) : Memory {
     override fun size(): Int {
@@ -53,6 +88,7 @@ class AndroidMemory(val memory: ByteBuffer, val size: Int) : Memory {
     }
 }
 
+
 @OptIn(ExperimentalUuidApi::class)
 actual fun allocateMemory(size: Int): Memory {
 
@@ -60,4 +96,9 @@ actual fun allocateMemory(size: Int): Memory {
 
     return AndroidMemory(memory, size)
 
+}
+
+actual fun randomAccessFile(path: Path): io.github.remmerw.grid.RandomAccessFile {
+    val raf = RandomAccessFile(path.toString(), "rw")
+    return AndroidRandomAccessFile(raf)
 }
