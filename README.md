@@ -8,7 +8,7 @@
 
 ## Grid
 
-The **Grid** is a small library which contains small memory functionality.
+The **Grid** is a tiny library which contains memory and file functionality.
 
 
 ## Integration
