@@ -2,6 +2,7 @@ package io.github.remmerw.grid
 
 import kotlinx.io.Buffer
 import kotlinx.io.RawSource
+import kotlinx.io.Sink
 import kotlinx.io.bytestring.getByteString
 import kotlinx.io.files.Path
 import kotlinx.io.readByteArray
@@ -31,11 +32,29 @@ class JvmRandomAccessFile(val raf: RandomAccessFile) : io.github.remmerw.grid.Ra
         memory.rawSource().use { source ->
             do {
                 val written = source.readAtMostTo(buffer, SPLITTER)
-                if(written > 0){
+                if (written > 0) {
                     raf.write(buffer.readByteArray())
                 }
-            } while(written > 0)
+            } while (written > 0)
         }
+    }
+
+    override fun transferTo(sink: Sink, offset: Long, length: Int) {
+        raf.seek(offset)
+        val data = ByteArray(SPLITTER.toInt())
+        var stillToRead = length
+        var read: Int
+        var todo: Boolean
+        var min: Int
+        do {
+            read = raf.read(data)
+            todo = read > 0 && stillToRead > 0
+            if (todo) {
+                min = min(read, stillToRead)
+                sink.write(data, 0, min)
+                stillToRead -= read
+            }
+        } while (todo)
     }
 
     override fun close() {

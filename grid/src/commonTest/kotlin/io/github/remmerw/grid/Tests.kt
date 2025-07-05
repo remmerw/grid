@@ -141,9 +141,10 @@ class Tests {
         }
 
         // second run
+        val sink = Buffer()
         randomAccessFile(file).use { raf ->
-            val cmp = raf.readBytes(offset, data.size)
-            assertContentEquals(data, cmp)
+            raf.transferTo(sink, offset, data.size)
+            assertContentEquals(data, sink.readByteArray())
         }
     }
 

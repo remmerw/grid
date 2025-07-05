@@ -3,6 +3,7 @@ package io.github.remmerw.grid
 import kotlinx.io.Buffer
 import kotlinx.io.RawSink
 import kotlinx.io.RawSource
+import kotlinx.io.Sink
 import kotlinx.io.buffered
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
@@ -14,6 +15,7 @@ interface RandomAccessFile : AutoCloseable {
     fun readBytes(offset: Long, length: Int): ByteArray
     fun writeBytes(bytes: ByteArray, offset: Long)
     fun writeMemory(memory: Memory, offset: Long)
+    fun transferTo(sink: Sink, offset: Long, length: Int)
     override fun close()
 }
 
@@ -24,10 +26,12 @@ interface Memory {
     fun transferTo(sink: RawSink) {
         rawSource().buffered().transferTo(sink)
     }
+
     fun rawSource(): RawSource
 }
+
 expect fun allocateMemory(size: Int): Memory
-expect fun randomAccessFile(path:Path): RandomAccessFile
+expect fun randomAccessFile(path: Path): RandomAccessFile
 
 fun allocateMemory(bytes: ByteArray): Memory {
     val memory = allocateMemory(bytes.size)
@@ -48,7 +52,7 @@ fun allocateMemory(path: Path): Memory {
                 memory.writeBytes(sink.readByteArray(), offset)
                 offset += read.toInt()
             }
-        } while(read > 0)
+        } while (read > 0)
     }
     return memory
 }
