@@ -15,7 +15,7 @@ interface RandomAccessFile : AutoCloseable {
     fun readBytes(offset: Long, length: Int): ByteArray
     fun writeBytes(bytes: ByteArray, offset: Long)
     fun writeMemory(memory: Memory, offset: Long)
-    fun transferTo(sink: Sink, offset: Long, length: Int)
+    fun transferTo(sink: Sink, offset: Long, length: Long)
     override fun close()
 }
 

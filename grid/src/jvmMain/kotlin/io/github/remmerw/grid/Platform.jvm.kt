@@ -11,7 +11,9 @@ import java.nio.ByteBuffer
 import kotlin.math.min
 import kotlin.uuid.ExperimentalUuidApi
 
-class AndroidRandomAccessFile(val raf: RandomAccessFile) : io.github.remmerw.grid.RandomAccessFile {
+
+class JvmRandomAccessFile(val raf: RandomAccessFile) : io.github.remmerw.grid.RandomAccessFile {
+
     override fun readBytes(offset: Long, length: Int): ByteArray {
         raf.seek(offset)
         val data = ByteArray(length)
@@ -37,7 +39,7 @@ class AndroidRandomAccessFile(val raf: RandomAccessFile) : io.github.remmerw.gri
         }
     }
 
-    override fun transferTo(sink: Sink, offset: Long, length: Int) {
+    override fun transferTo(sink: Sink, offset: Long, length: Long) {
         raf.seek(offset)
         val data = ByteArray(SPLITTER.toInt())
         var stillToRead = length
@@ -48,7 +50,7 @@ class AndroidRandomAccessFile(val raf: RandomAccessFile) : io.github.remmerw.gri
             read = raf.read(data)
             todo = read > 0 && stillToRead > 0
             if (todo) {
-                min = min(read, stillToRead)
+                min = min(read.toLong(), stillToRead).toInt()
                 sink.write(data, 0, min)
                 stillToRead -= read
             }
@@ -61,7 +63,7 @@ class AndroidRandomAccessFile(val raf: RandomAccessFile) : io.github.remmerw.gri
 
 }
 
-class AndroidMemory(val memory: ByteBuffer, val size: Int) : Memory {
+class JvmMemory(val memory: ByteBuffer, val size: Int) : Memory {
     override fun size(): Int {
         return size
     }
@@ -105,19 +107,17 @@ class AndroidMemory(val memory: ByteBuffer, val size: Int) : Memory {
 
         }
     }
+
 }
 
 
 @OptIn(ExperimentalUuidApi::class)
 actual fun allocateMemory(size: Int): Memory {
-
     val memory = ByteBuffer.allocateDirect(size)
-
-    return AndroidMemory(memory, size)
-
+    return JvmMemory(memory, size)
 }
 
 actual fun randomAccessFile(path: Path): io.github.remmerw.grid.RandomAccessFile {
     val raf = RandomAccessFile(path.toString(), "rw")
-    return AndroidRandomAccessFile(raf)
+    return JvmRandomAccessFile(raf)
 }

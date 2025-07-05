@@ -11,9 +11,7 @@ import java.nio.ByteBuffer
 import kotlin.math.min
 import kotlin.uuid.ExperimentalUuidApi
 
-
-class JvmRandomAccessFile(val raf: RandomAccessFile) : io.github.remmerw.grid.RandomAccessFile {
-
+class AndroidRandomAccessFile(val raf: RandomAccessFile) : io.github.remmerw.grid.RandomAccessFile {
     override fun readBytes(offset: Long, length: Int): ByteArray {
         raf.seek(offset)
         val data = ByteArray(length)
@@ -39,7 +37,7 @@ class JvmRandomAccessFile(val raf: RandomAccessFile) : io.github.remmerw.grid.Ra
         }
     }
 
-    override fun transferTo(sink: Sink, offset: Long, length: Int) {
+    override fun transferTo(sink: Sink, offset: Long, length: Long) {
         raf.seek(offset)
         val data = ByteArray(SPLITTER.toInt())
         var stillToRead = length
@@ -50,7 +48,7 @@ class JvmRandomAccessFile(val raf: RandomAccessFile) : io.github.remmerw.grid.Ra
             read = raf.read(data)
             todo = read > 0 && stillToRead > 0
             if (todo) {
-                min = min(read, stillToRead)
+                min = min(read.toLong(), stillToRead).toInt()
                 sink.write(data, 0, min)
                 stillToRead -= read
             }
@@ -63,7 +61,7 @@ class JvmRandomAccessFile(val raf: RandomAccessFile) : io.github.remmerw.grid.Ra
 
 }
 
-class JvmMemory(val memory: ByteBuffer, val size: Int) : Memory {
+class AndroidMemory(val memory: ByteBuffer, val size: Int) : Memory {
     override fun size(): Int {
         return size
     }
@@ -107,17 +105,19 @@ class JvmMemory(val memory: ByteBuffer, val size: Int) : Memory {
 
         }
     }
-
 }
 
 
 @OptIn(ExperimentalUuidApi::class)
 actual fun allocateMemory(size: Int): Memory {
+
     val memory = ByteBuffer.allocateDirect(size)
-    return JvmMemory(memory, size)
+
+    return AndroidMemory(memory, size)
+
 }
 
 actual fun randomAccessFile(path: Path): io.github.remmerw.grid.RandomAccessFile {
     val raf = RandomAccessFile(path.toString(), "rw")
-    return JvmRandomAccessFile(raf)
+    return AndroidRandomAccessFile(raf)
 }
