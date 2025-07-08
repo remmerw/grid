@@ -12,22 +12,20 @@ import kotlin.math.min
 import kotlin.uuid.ExperimentalUuidApi
 
 
-class JvmRandomAccessFile(val raf: RandomAccessFile) : io.github.remmerw.grid.RandomAccessFile {
+internal class JvmRandomAccessFile(val raf: RandomAccessFile) : io.github.remmerw.grid.RandomAccessFile {
 
-    override fun readBytes(offset: Long, length: Int): ByteArray {
-        raf.seek(offset)
-        val data = ByteArray(length)
-        raf.readFully(data)
-        return data
+    override fun readBytes(position: Long, bytes: ByteArray, offset: Int, length: Int) {
+        raf.seek(position)
+        raf.read(bytes, offset, length)
     }
 
-    override fun writeBytes(bytes: ByteArray, offset: Long) {
-        raf.seek(offset)
-        raf.write(bytes)
+    override fun writeBytes(position: Long, bytes: ByteArray, offset: Int, length: Int) {
+        raf.seek(position)
+        raf.write(bytes, offset, length)
     }
 
-    override fun writeMemory(memory: Memory, offset: Long) {
-        raf.seek(offset)
+    override fun writeMemory(position: Long, memory: Memory) {
+        raf.seek(position)
         val buffer = Buffer()
         memory.rawSource().use { source ->
             do {
@@ -39,8 +37,8 @@ class JvmRandomAccessFile(val raf: RandomAccessFile) : io.github.remmerw.grid.Ra
         }
     }
 
-    override fun transferTo(sink: Sink, offset: Long, length: Long) {
-        raf.seek(offset)
+    override fun transferTo(position: Long, sink: Sink, length: Long) {
+        raf.seek(position)
         val data = ByteArray(SPLITTER.toInt())
         var stillToRead = length
         var read: Int
@@ -63,7 +61,7 @@ class JvmRandomAccessFile(val raf: RandomAccessFile) : io.github.remmerw.grid.Ra
 
 }
 
-class JvmMemory(val memory: ByteBuffer, val size: Int) : Memory {
+internal class JvmMemory(val memory: ByteBuffer, val size: Int) : Memory {
     override fun size(): Int {
         return size
     }

@@ -11,21 +11,19 @@ import java.nio.ByteBuffer
 import kotlin.math.min
 import kotlin.uuid.ExperimentalUuidApi
 
-class AndroidRandomAccessFile(val raf: RandomAccessFile) : io.github.remmerw.grid.RandomAccessFile {
-    override fun readBytes(offset: Long, length: Int): ByteArray {
-        raf.seek(offset)
-        val data = ByteArray(length)
-        raf.readFully(data)
-        return data
+internal class AndroidRandomAccessFile(val raf: RandomAccessFile) : io.github.remmerw.grid.RandomAccessFile {
+    override fun readBytes(position: Long, bytes: ByteArray, offset: Int, length: Int) {
+        raf.seek(position)
+        raf.read(bytes, offset, length)
     }
 
-    override fun writeBytes(bytes: ByteArray, offset: Long) {
-        raf.seek(offset)
-        raf.write(bytes)
+    override fun writeBytes(position: Long, bytes: ByteArray, offset: Int, length: Int) {
+        raf.seek(position)
+        raf.write(bytes, offset, length)
     }
 
-    override fun writeMemory(memory: Memory, offset: Long) {
-        raf.seek(offset)
+    override fun writeMemory(position: Long, memory: Memory) {
+        raf.seek(position)
         val buffer = Buffer()
         memory.rawSource().use { source ->
             do {
@@ -37,8 +35,8 @@ class AndroidRandomAccessFile(val raf: RandomAccessFile) : io.github.remmerw.gri
         }
     }
 
-    override fun transferTo(sink: Sink, offset: Long, length: Long) {
-        raf.seek(offset)
+    override fun transferTo(position: Long, sink: Sink, length: Long) {
+        raf.seek(position)
         val data = ByteArray(SPLITTER.toInt())
         var stillToRead = length
         var read: Int
@@ -61,7 +59,7 @@ class AndroidRandomAccessFile(val raf: RandomAccessFile) : io.github.remmerw.gri
 
 }
 
-class AndroidMemory(val memory: ByteBuffer, val size: Int) : Memory {
+internal class AndroidMemory(val memory: ByteBuffer, val size: Int) : Memory {
     override fun size(): Int {
         return size
     }

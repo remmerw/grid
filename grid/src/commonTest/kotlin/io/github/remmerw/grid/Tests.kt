@@ -104,19 +104,21 @@ class Tests {
         val file = Path(path, "data.db")
 
         val data = Random.nextBytes(1000)
-        val offset = 10000L
+        val position = 10000L
 
         randomAccessFile(file).use { raf ->
-            raf.writeBytes(data, offset)
+            raf.writeBytes(position, data)
 
-            val cmp = raf.readBytes(offset, data.size)
+            val cmp = ByteArray(data.size)
+            raf.readBytes(position, cmp)
             assertContentEquals(data, cmp)
 
         }
 
         // second run
         randomAccessFile(file).use { raf ->
-            val cmp = raf.readBytes(offset, data.size)
+            val cmp = ByteArray(data.size)
+            raf.readBytes(position, cmp, 0, cmp.size)
             assertContentEquals(data, cmp)
         }
     }
@@ -133,9 +135,10 @@ class Tests {
         val offset = 10000L
 
         randomAccessFile(file).use { raf ->
-            raf.writeMemory(memory, offset)
+            raf.writeMemory(offset, memory)
 
-            val cmp = raf.readBytes(offset, data.size)
+            val cmp = ByteArray(data.size)
+            raf.readBytes(offset, cmp)
             assertContentEquals(data, cmp)
 
         }
@@ -143,8 +146,37 @@ class Tests {
         // second run
         val sink = Buffer()
         randomAccessFile(file).use { raf ->
-            raf.transferTo(sink, offset, data.size.toLong())
+            raf.transferTo(offset, sink, data.size.toLong())
             assertContentEquals(data, sink.readByteArray())
+        }
+    }
+
+
+    @OptIn(ExperimentalUuidApi::class)
+    @Test
+    fun randomAccessFilePieces() {
+        val path = Path(SystemTemporaryDirectory, Uuid.random().toHexString())
+        SystemFileSystem.createDirectories(path)
+        val file = Path(path, "data.db")
+
+
+        val data = Random.nextBytes(500)
+        randomAccessFile(file).use { raf ->
+            var position = 0L
+            repeat(10) {
+                raf.writeBytes(position, data)
+                position += data.size
+            }
+        }
+
+        randomAccessFile(file).use { raf ->
+            val cmp = ByteArray(data.size)
+            var position = 0L
+            repeat(10) {
+                raf.readBytes(position, cmp)
+                position += data.size
+            }
+            assertContentEquals(data, cmp)
         }
     }
 
