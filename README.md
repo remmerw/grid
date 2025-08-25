@@ -19,7 +19,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             ...
-            implementation("io.github.remmerw:grid:0.0.8")
+            implementation("io.github.remmerw:grid:0.0.9")
         }
         ...
     }
@@ -45,6 +45,8 @@ interface Memory {
 
 
 interface RandomAccessFile : AutoCloseable {
+    fun read(position: Long, bytes: ByteArray) : Int
+    fun writeBoolean(position: Long, boolean: Boolean)
     fun readBytes(position: Long, bytes: ByteArray, offset: Int = 0, length: Int = bytes.size)
     fun writeBytes(position: Long, bytes: ByteArray, offset: Int = 0, length: Int = bytes.size)
     fun writeMemory(position: Long, memory: Memory)
