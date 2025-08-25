@@ -24,7 +24,7 @@ class WorkManager : AutoCloseable {
         try {
             job?.cancel()
         } catch (throwable: Throwable) {
-            debug("WorkManager", throwable)
+            debug(throwable)
         }
     }
 
