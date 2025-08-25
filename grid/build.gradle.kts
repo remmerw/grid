@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "io.github.remmerw"
-version = "0.0.7"
+version = "0.0.8"
 
 kotlin {
 
@@ -33,6 +33,7 @@ kotlin {
             dependencies {
                 implementation(libs.kotlin.stdlib)
                 implementation(libs.kotlinx.io.core)
+                implementation(libs.kotlinx.coroutines.core)
             }
         }
 
@@ -45,7 +46,7 @@ kotlin {
 
         androidInstrumentedTest.dependencies {
             implementation(libs.kotlin.test)
-            implementation("androidx.test:runner:1.6.2")
+            implementation(libs.runner)
         }
     }
 }

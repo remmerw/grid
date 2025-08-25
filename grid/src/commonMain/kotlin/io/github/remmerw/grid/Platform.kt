@@ -169,3 +169,12 @@ fun randomAccessFile(path: Path): io.github.remmerw.grid.RandomAccessFile {
     val raf = RandomAccessFile(path.toString(), "rw")
     return RandomAccessFileImpl(raf)
 }
+
+
+
+internal fun debug(throwable: Throwable) {
+    if (ERROR) {
+        throwable.printStackTrace()
+    }
+}
+private const val ERROR: Boolean = true
