@@ -17,7 +17,7 @@ import kotlin.uuid.ExperimentalUuidApi
 const val SPLITTER = 4096L
 
 interface RandomAccessFile : AutoCloseable {
-    fun read(position: Long, bytes: ByteArray) : Int
+    fun read(position: Long, bytes: ByteArray): Int
     fun writeBoolean(position: Long, boolean: Boolean)
     fun readBytes(position: Long, bytes: ByteArray, offset: Int = 0, length: Int = bytes.size)
     fun writeBytes(position: Long, bytes: ByteArray, offset: Int = 0, length: Int = bytes.size)
@@ -63,11 +63,12 @@ fun allocateMemory(path: Path): Memory {
 }
 
 
-private class RandomAccessFileImpl(val raf: RandomAccessFile) : io.github.remmerw.grid.RandomAccessFile {
+private class RandomAccessFileImpl(val raf: RandomAccessFile) :
+    io.github.remmerw.grid.RandomAccessFile {
 
-    override fun read(position: Long, bytes: ByteArray) : Int {
-         raf.seek(position)
-         return raf.read(bytes)
+    override fun read(position: Long, bytes: ByteArray): Int {
+        raf.seek(position)
+        return raf.read(bytes)
     }
 
     override fun writeBoolean(position: Long, boolean: Boolean) {
@@ -184,10 +185,10 @@ fun randomAccessFile(path: Path): io.github.remmerw.grid.RandomAccessFile {
 }
 
 
-
 internal fun debug(throwable: Throwable) {
     if (ERROR) {
         throwable.printStackTrace()
     }
 }
+
 private const val ERROR: Boolean = true

@@ -35,13 +35,13 @@ class WorkManager : AutoCloseable {
 
     @OptIn(ExperimentalUuidApi::class)
     fun start(work: Work): String {
-        val uuid = Uuid.toString()
+        val uuid = Uuid.random().toString()
 
         val job = scope.launch {
             try {
                 work.run()
             } catch (throwable: Throwable) {
-                debug( throwable)
+                debug(throwable)
             } finally {
                 works.remove(uuid)
             }
@@ -56,7 +56,7 @@ class WorkManager : AutoCloseable {
         try {
             scope.cancel()
         } catch (throwable: Throwable) {
-            debug( throwable)
+            debug(throwable)
         }
     }
 }
