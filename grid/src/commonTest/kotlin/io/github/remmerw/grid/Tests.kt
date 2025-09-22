@@ -16,6 +16,14 @@ import kotlin.uuid.Uuid
 class Tests {
 
     @Test
+    fun allocateByteArray(){
+        val instance = ByteArrayPool.getInstance(500)
+        val array = instance.get()
+        assertTrue(array.byteArray.size == 500)
+        array.close()
+    }
+
+    @Test
     fun allocateSmall() {
 
         val data = "Moin".encodeToByteArray()
