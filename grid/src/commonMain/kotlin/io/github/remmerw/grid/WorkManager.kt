@@ -47,7 +47,7 @@ class WorkManager : AutoCloseable {
             }
         }
 
-        works.put(uuid, job)
+        works[uuid] = job
         return uuid
     }
 
