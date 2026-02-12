@@ -9,6 +9,7 @@ import kotlinx.io.readByteArray
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -19,7 +20,7 @@ class Tests {
     fun allocateByteArray(){
         val instance = ByteArrayPool.getInstance(500)
         val array = instance.get()
-        assertTrue(array.byteArray.size == 500)
+        assertEquals(array.byteArray.size, 500)
         array.close()
     }
 
