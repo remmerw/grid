@@ -11,7 +11,7 @@ version = "0.1.4"
 
 kotlin {
 
-    androidLibrary {
+    android {
         namespace = "io.github.remmerw.grid"
         compileSdk = 36
         minSdk = 27
