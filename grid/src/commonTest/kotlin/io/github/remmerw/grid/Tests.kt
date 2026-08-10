@@ -15,7 +15,6 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 class Tests {
-
     @Test
     fun allocateByteArray() {
         val instance = ByteArrayPool.getInstance(500)
@@ -26,7 +25,6 @@ class Tests {
 
     @Test
     fun allocateSmall() {
-
         val data = "Moin".encodeToByteArray()
         val memory = allocateMemory(data.size)
         memory.writeBytes(data, 0)
@@ -41,10 +39,8 @@ class Tests {
         assertTrue(data.contentEquals(c))
     }
 
-
     @Test
     fun allocateBig() {
-
         val data = Random.nextBytes(3.times(UShort.MAX_VALUE.toInt()) + 10000)
         val memory = allocateMemory(data.size)
         memory.writeBytes(data, 0)
@@ -61,7 +57,6 @@ class Tests {
 
     @Test
     fun allocateDataBig() {
-
         val data = Random.nextBytes(3.times(UShort.MAX_VALUE.toInt()) + 10000)
         val memory = allocateMemory(data)
 
@@ -76,11 +71,9 @@ class Tests {
         assertTrue(data.contentEquals(c))
     }
 
-
     @OptIn(ExperimentalUuidApi::class)
     @Test
     fun allocateFileBig() {
-
         val path = Path(SystemTemporaryDirectory, Uuid.random().toHexString())
         SystemFileSystem.createDirectories(path)
         val file = Path(path, "data.txt")
@@ -104,7 +97,6 @@ class Tests {
         assertTrue(data.contentEquals(c))
     }
 
-
     @OptIn(ExperimentalUuidApi::class)
     @Test
     fun randomAccessFileBasic() {
@@ -121,7 +113,6 @@ class Tests {
             val cmp = ByteArray(data.size)
             raf.readBytes(position, cmp)
             assertContentEquals(data, cmp)
-
         }
 
         // second run
@@ -149,7 +140,6 @@ class Tests {
             val cmp = ByteArray(data.size)
             raf.readBytes(offset, cmp)
             assertContentEquals(data, cmp)
-
         }
 
         // second run
@@ -160,14 +150,12 @@ class Tests {
         }
     }
 
-
     @OptIn(ExperimentalUuidApi::class)
     @Test
     fun randomAccessFilePieces() {
         val path = Path(SystemTemporaryDirectory, Uuid.random().toHexString())
         SystemFileSystem.createDirectories(path)
         val file = Path(path, "data.db")
-
 
         val data = Random.nextBytes(500)
         randomAccessFile(file).use { raf ->
@@ -188,5 +176,4 @@ class Tests {
             assertContentEquals(data, cmp)
         }
     }
-
 }

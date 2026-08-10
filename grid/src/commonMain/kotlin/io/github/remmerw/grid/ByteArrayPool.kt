@@ -3,9 +3,10 @@ package io.github.remmerw.grid
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
-
-class PooledByteArray(size: Int, val pool: ByteArrayPool) : AutoCloseable {
-
+class PooledByteArray(
+    size: Int,
+    val pool: ByteArrayPool,
+) : AutoCloseable {
     val byteArray: ByteArray = ByteArray(size)
 
     override fun close() {
@@ -13,7 +14,9 @@ class PooledByteArray(size: Int, val pool: ByteArrayPool) : AutoCloseable {
     }
 }
 
-class ByteArrayPool(val size: Int) {
+class ByteArrayPool(
+    val size: Int,
+) {
     private val lock = ReentrantLock()
     private val used = mutableSetOf<PooledByteArray>()
     private val free = mutableSetOf<PooledByteArray>()
@@ -39,7 +42,6 @@ class ByteArrayPool(val size: Int) {
             }
         }
     }
-
 
     companion object {
         @Volatile
