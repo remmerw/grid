@@ -17,26 +17,63 @@ import kotlin.uuid.ExperimentalUuidApi
 const val SPLITTER = 4096L
 
 interface RandomAccessFile : AutoCloseable {
-    fun read(position: Long, bytes: ByteArray): Int
-    fun writeBoolean(position: Long, boolean: Boolean)
-    fun readBytes(position: Long, bytes: ByteArray, offset: Int = 0, length: Int = bytes.size)
-    fun writeBytes(position: Long, bytes: ByteArray, offset: Int = 0, length: Int = bytes.size)
-    fun writeMemory(position: Long, memory: Memory)
-    fun transferTo(position: Long, sink: Sink, length: Long)
+    fun read(
+        position: Long,
+        bytes: ByteArray,
+    ): Int
+
+    fun writeBoolean(
+        position: Long,
+        boolean: Boolean,
+    )
+
+    fun readBytes(
+        position: Long,
+        bytes: ByteArray,
+        offset: Int = 0,
+        length: Int = bytes.size,
+    )
+
+    fun writeBytes(
+        position: Long,
+        bytes: ByteArray,
+        offset: Int = 0,
+        length: Int = bytes.size,
+    )
+
+    fun writeMemory(
+        position: Long,
+        memory: Memory,
+    )
+
+    fun transferTo(
+        position: Long,
+        sink: Sink,
+        length: Long,
+    )
+
     override fun close()
 }
 
 interface Memory {
-    fun writeBytes(bytes: ByteArray, offset: Int)
+    fun writeBytes(
+        bytes: ByteArray,
+        offset: Int,
+    )
+
     fun size(): Int
-    fun readBytes(offset: Int, length: Int): ByteArray
+
+    fun readBytes(
+        offset: Int,
+        length: Int,
+    ): ByteArray
+
     fun transferTo(sink: RawSink) {
         rawSource().buffered().transferTo(sink)
     }
 
     fun rawSource(): RawSource
 }
-
 
 fun allocateMemory(bytes: ByteArray): Memory {
     val memory = allocateMemory(bytes.size)
@@ -62,31 +99,49 @@ fun allocateMemory(path: Path): Memory {
     return memory
 }
 
-
-private class RandomAccessFileImpl(val raf: RandomAccessFile) :
-    io.github.remmerw.grid.RandomAccessFile {
-
-    override fun read(position: Long, bytes: ByteArray): Int {
+private class RandomAccessFileImpl(
+    val raf: RandomAccessFile,
+) : io.github.remmerw.grid.RandomAccessFile {
+    override fun read(
+        position: Long,
+        bytes: ByteArray,
+    ): Int {
         raf.seek(position)
         return raf.read(bytes)
     }
 
-    override fun writeBoolean(position: Long, boolean: Boolean) {
+    override fun writeBoolean(
+        position: Long,
+        boolean: Boolean,
+    ) {
         raf.seek(position)
         raf.writeBoolean(boolean)
     }
 
-    override fun readBytes(position: Long, bytes: ByteArray, offset: Int, length: Int) {
+    override fun readBytes(
+        position: Long,
+        bytes: ByteArray,
+        offset: Int,
+        length: Int,
+    ) {
         raf.seek(position)
         raf.read(bytes, offset, length)
     }
 
-    override fun writeBytes(position: Long, bytes: ByteArray, offset: Int, length: Int) {
+    override fun writeBytes(
+        position: Long,
+        bytes: ByteArray,
+        offset: Int,
+        length: Int,
+    ) {
         raf.seek(position)
         raf.write(bytes, offset, length)
     }
 
-    override fun writeMemory(position: Long, memory: Memory) {
+    override fun writeMemory(
+        position: Long,
+        memory: Memory,
+    ) {
         raf.seek(position)
         val buffer = Buffer()
         memory.rawSource().use { source ->
@@ -99,7 +154,11 @@ private class RandomAccessFileImpl(val raf: RandomAccessFile) :
         }
     }
 
-    override fun transferTo(position: Long, sink: Sink, length: Long) {
+    override fun transferTo(
+        position: Long,
+        sink: Sink,
+        length: Long,
+    ) {
         raf.seek(position)
         val data = ByteArray(SPLITTER.toInt())
         var stillToRead = length
@@ -120,15 +179,18 @@ private class RandomAccessFileImpl(val raf: RandomAccessFile) :
     override fun close() {
         raf.close()
     }
-
 }
 
-internal class MemoryImpl(val memory: ByteBuffer, val size: Int) : Memory {
-    override fun size(): Int {
-        return size
-    }
+internal class MemoryImpl(
+    val memory: ByteBuffer,
+    val size: Int,
+) : Memory {
+    override fun size(): Int = size
 
-    override fun readBytes(offset: Int, length: Int): ByteArray {
+    override fun readBytes(
+        offset: Int,
+        length: Int,
+    ): ByteArray {
         memory.rewind()
         memory.position(offset)
         val result = ByteArray(length)
@@ -136,12 +198,14 @@ internal class MemoryImpl(val memory: ByteBuffer, val size: Int) : Memory {
         return result
     }
 
-    override fun writeBytes(bytes: ByteArray, offset: Int) {
+    override fun writeBytes(
+        bytes: ByteArray,
+        offset: Int,
+    ) {
         memory.rewind()
         memory.position(offset)
         memory.put(bytes)
     }
-
 
     override fun rawSource(): RawSource {
         memory.rewind()
@@ -149,7 +213,7 @@ internal class MemoryImpl(val memory: ByteBuffer, val size: Int) : Memory {
         return object : RawSource {
             override fun readAtMostTo(
                 sink: Buffer,
-                byteCount: Long
+                byteCount: Long,
             ): Long {
                 val read = min(byteCount, memory.remaining().toLong())
                 if (read > 0) {
@@ -164,26 +228,21 @@ internal class MemoryImpl(val memory: ByteBuffer, val size: Int) : Memory {
             override fun close() {
                 // nothing to do
             }
-
         }
     }
 }
 
-
 @OptIn(ExperimentalUuidApi::class)
 fun allocateMemory(size: Int): Memory {
-
     val memory = ByteBuffer.allocateDirect(size)
 
     return MemoryImpl(memory, size)
-
 }
 
 fun randomAccessFile(path: Path): io.github.remmerw.grid.RandomAccessFile {
     val raf = RandomAccessFile(path.toString(), "rw")
     return RandomAccessFileImpl(raf)
 }
-
 
 internal fun debug(throwable: Throwable) {
     if (ERROR) {

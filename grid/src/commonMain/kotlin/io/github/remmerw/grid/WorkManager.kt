@@ -9,13 +9,11 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-
 interface Work {
     suspend fun run()
 }
 
 class WorkManager : AutoCloseable {
-
     private val works: MutableMap<String, Job> = ConcurrentHashMap()
     private val scope = CoroutineScope(Dispatchers.IO)
 
@@ -32,20 +30,20 @@ class WorkManager : AutoCloseable {
         works.keys.forEach { uuid -> cancel(uuid) }
     }
 
-
     @OptIn(ExperimentalUuidApi::class)
     fun start(work: Work): String {
         val uuid = Uuid.random().toString()
 
-        val job = scope.launch {
-            try {
-                work.run()
-            } catch (throwable: Throwable) {
-                debug(throwable)
-            } finally {
-                works.remove(uuid)
+        val job =
+            scope.launch {
+                try {
+                    work.run()
+                } catch (throwable: Throwable) {
+                    debug(throwable)
+                } finally {
+                    works.remove(uuid)
+                }
             }
-        }
 
         works[uuid] = job
         return uuid

@@ -40,12 +40,8 @@ kotlin {
                 implementation(libs.kotlin.test)
             }
         }
-
     }
 }
-
-
-
 
 mavenPublishing {
     publishToMavenCentral()
